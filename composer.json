@@ -1,0 +1,34 @@
+{
+  "name": "clicktonext/kirby-move-pages",
+  "description": "You can move the pages under the parent pages you specify with this plugin.",
+  "type": "kirby-plugin",
+  "version": "1.0.0",
+  "license": "MIT",
+  "keywords": [
+    "kirby",
+    "kirby-3",
+    "kirby3-plugin",
+    "kirby-plugin"
+  ],
+  "authors": [
+    {
+      "name": "Click to Next",
+      "email": "support@clicktonext.com",
+      "homepage": "https://clicktonext.com"
+    }
+  ],
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "require": {
+    "php": "^7.3|^8.0",
+    "getkirby/composer-installer": "^1.2"
+  },
+  "extra": {
+    "installer-name": "kirby-move-pages"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
