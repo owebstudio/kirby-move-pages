@@ -1,6 +1,6 @@
 # Kirby Move Pages
 
-You can move the pages under the parent pages you specify with this plugin.
+Missing move pages feature for Kirby 3. You can move the pages under the parent pages you specify with this plugin.
 
 ## Installation
 
