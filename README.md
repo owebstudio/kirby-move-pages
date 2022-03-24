@@ -8,29 +8,71 @@ Missing move pages feature for Kirby 3. You can move the pages under the parent 
 2. Unzip downloaded file
 3. Copy/paste unzipped folder in your `/site/plugins` folder
 
-## Sample Use Case
+## Usage
 
-### App Directory
+Don't forget! To move a page to the under the another page, the parent page must support the page template you have moved. This option must be a query language string or an
+array of templates and must be a collection of pages, not a single page.
 
-- /home
-- /about
-- /projects
-  - /ongoing
-  - /completed
-  - /archived
-- /contact
+### Query language
 
-### Blueprint
-
-/site/blueprints/pages/project.yml
 ```yaml
+# /site/blueprints/pages/project.yml
 title: Project
 
 options:
-  move:
-    - projects/ongoing
-    - projects/completed
-    - projects/archived
+  # parent pages collection where you can move this page
+  move: site.children.filterBy('template', 'in', ['projects', 'portfolio'])
 ```
 
-A project page can now be moved to the ongoing, completed or archived pages.
+### Templates
+
+```yaml
+# /site/blueprints/pages/portfolio.yml
+title: Portfolio
+
+options:
+  # parent page templates where you can move this page
+  move:
+    - projects
+    - portfolio
+```
+
+## Sample use case: shop
+
+For example, let's assume that there is a multi-category structure on a shop site. You want to move a product to another category.
+
+### Content directory
+
+- /home
+- /about
+- /shop
+    - /category-a
+        - Product A
+    - /category-b
+        - Product B
+    - /category-c
+        - Product C
+- /contact
+
+You can set `move` option with `category` template:
+
+```yaml
+# /site/blueprints/pages/product.yml
+title: Product item
+
+options:
+  move:
+    - category
+```
+
+Or you can use query language:
+
+```yaml
+# /site/blueprints/pages/product.yml
+title: Product item
+
+options:
+  move: kirby.page('shop').children
+```
+
+
