@@ -4,12 +4,13 @@ use Kirby\Cms\App as Kirby;
 use Kirby\Cms\Find;
 use Kirby\Panel\Field;
 use Kirby\Panel\Panel;
+use Kirby\Toolkit\Str;
 
 Kirby::plugin('clicktonext/kirby-move-pages', [
     'translations' => [
         'en' => [
             'move' => 'Move',
-            'select.parent' => 'Select Parent',
+            'select.parent' => 'Select parent',
         ],
         'de' => [
             'move' => 'Bewegung',
@@ -17,7 +18,7 @@ Kirby::plugin('clicktonext/kirby-move-pages', [
         ],
         'tr' => [
             'move' => 'Taşı',
-            'select.parent' => 'Ebeveyn Seçiniz',
+            'select.parent' => 'Ebeveyn seçiniz',
         ]
     ],
     'areas' => [
@@ -34,9 +35,9 @@ Kirby::plugin('clicktonext/kirby-move-pages', [
                             $dropdown = $page->panel()->dropdown();
 
                             // get page options
-                            $options = $page->blueprint()->options()['move'] ?? false;
+                            $move = $page->blueprint()->options()['move'] ?? null;
 
-                            if (is_array($options) === false) {
+                            if (empty($move) === true) {
                                 return $dropdown;
                             }
 
@@ -57,23 +58,38 @@ Kirby::plugin('clicktonext/kirby-move-pages', [
                 'dialogs' => [
                     'page.move' => [
                         'pattern' => 'pages/(:any)/move',
-                        'load' => function (string $path) {
+                        'load' => function (string $path) use ($kirby) {
                             try {
                                 $page = Find::page($path);
                                 $move = $page->blueprint()->options()['move'] ?? false;
 
-                                if (is_array($move) === false) {
+                                if (is_string($move) === true) {
+                                    $parents = Str::query($move, [
+                                        'kirby' => $kirby,
+                                        'site' => $kirby->site(),
+                                        'model' => $page,
+                                        'page' => $page
+                                    ]);
+                                } elseif (is_array($move) === true) {
+                                    $parents = $kirby->site()->index()->filterBy('intendedTemplate', 'in', $move);
+                                } else {
                                     throw new InvalidArgumentException('Invalid move option');
                                 }
 
+                                if (is_a($parents, '\Kirby\Cms\Pages') === false) {
+                                    throw new InvalidArgumentException('Move option should be return `\Kirby\Cms\Pages` collection with using query or page templates');
+                                }
+
                                 $options = [];
-                                foreach ($move as $id) {
-                                    if ($item = Find::page($id)) {
-                                        $options[] = [
-                                            'text' => $item->title()->value(),
-                                            'value' => $item->id()
-                                        ];
+                                foreach ($parents as $model) {
+                                    if ($page->parent()->is($model) === true) {
+                                        continue;
                                     }
+
+                                    $options[] = [
+                                        'text' => $model->title()->value() . ' (/' . $model->id() . ')',
+                                        'value' => $model->id()
+                                    ];
                                 }
                             } catch (Exception $e) {
                                 throw $e;
@@ -115,18 +131,24 @@ Kirby::plugin('clicktonext/kirby-move-pages', [
                                     Dir::make($parent->root() . '/_drafts');
                                     $target = $parent->root() . '/_drafts/' . $page->uid();
                                 } else {
-                                    $target = $parent->root() . '/' . $page->uid();
+                                    if ($page->isListed() === true) {
+                                        $target = $parent->root() . '/' . $page->num() . '_' . $page->uid();
+                                    } else {
+                                        $target = $parent->root() . '/' . $page->uid();
+                                    }
                                 }
 
                                 // move the page
                                 Dir::move($source, $target);
 
+                                $clone = $page->clone(['parent' => $parent]);
+
                                 if ($page->isDraft() === true) {
                                     $page->parentModel()->drafts()->remove($page);
-                                    $parent->drafts()->append($newId, $page->clone(['parent' => $parent]));
+                                    $parent->drafts()->append($newId, $clone);
                                 } else {
                                     $page->parentModel()->children()->remove($page);
-                                    $parent->children()->append($newId, $page->clone(['parent' => $parent]));
+                                    $parent->children()->append($newId, $clone);
                                 }
 
                                 // redirect after success
