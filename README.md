@@ -12,7 +12,24 @@ Missing move pages feature for Kirby 3. You can move the pages under the parent 
 
 Don't forget! To move a page under the another page, the parent page must support the page template you are moving. This option must be a query language string or an array of templates and must be a collection of pages, not a single page.
 
+### Templates
+
+Simply specify under which parent templates a page can be moved.
+
+```yaml
+# /site/blueprints/pages/project.yml
+title: Project
+
+options:
+  # parent page templates where you can move this page
+  move:
+    - projects
+    - portfolio
+```
+
 ### Query language
+
+If you need a more complex logic or dynamic parent templates, you can use the query language.
 
 ```yaml
 # /site/blueprints/pages/project.yml
@@ -21,19 +38,6 @@ title: Project
 options:
   # parent pages collection where you can move this page
   move: site.children.filterBy('template', 'in', ['projects', 'portfolio'])
-```
-
-### Templates
-
-```yaml
-# /site/blueprints/pages/portfolio.yml
-title: Portfolio
-
-options:
-  # parent page templates where you can move this page
-  move:
-    - projects
-    - portfolio
 ```
 
 ## Sample use case: shop
@@ -73,5 +77,3 @@ title: Product item
 options:
   move: kirby.page('shop').children
 ```
-
-
