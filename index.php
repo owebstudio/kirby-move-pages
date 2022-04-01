@@ -13,8 +13,8 @@ Kirby::plugin('clicktonext/kirby-move-pages', [
             'select.parent' => 'Select parent',
         ],
         'de' => [
-            'move' => 'Bewegung',
-            'select.parent' => 'Eltern auswählen',
+            'move' => 'Verschieben',
+            'select.parent' => 'Übergeordnete Seite auswählen',
         ],
         'tr' => [
             'move' => 'Taşı',
