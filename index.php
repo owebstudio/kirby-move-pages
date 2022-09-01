@@ -8,13 +8,17 @@ use Kirby\Toolkit\Str;
 
 Kirby::plugin('clicktonext/kirby-move-pages', [
     'translations' => [
+        'de' => [
+            'move' => 'Verschieben',
+            'select.parent' => 'Übergeordnete Seite auswählen',
+        ],
         'en' => [
             'move' => 'Move',
             'select.parent' => 'Select parent',
         ],
-        'de' => [
-            'move' => 'Verschieben',
-            'select.parent' => 'Übergeordnete Seite auswählen',
+        'fr' => [
+            'move' => 'Déplacer',
+            'select.parent' => 'Sélectionner la page parente',
         ],
         'tr' => [
             'move' => 'Taşı',
