@@ -1,25 +1,27 @@
 {
-  "name": "clicktonext/kirby-move-pages",
+  "name": "kirbynext/kirby-move-pages",
   "description": "Missing move pages feature for Kirby 3",
   "type": "kirby-plugin",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "license": "MIT",
   "keywords": [
     "kirby",
     "kirby-3",
+    "kirbynext",
     "kirby3-plugin",
     "kirby-plugin",
+    "kirbynext-plugin",
     "kirby-move-pages"
   ],
-  "homepage": "https://clicktonext.com",
+  "homepage": "https://kirbynext.com",
   "support": {
-    "email": "support@clicktonext.com"
+    "email": "support@kirbynext.com"
   },
   "authors": [
     {
-      "name": "Click to Next",
-      "email": "contact@clicktonext.com",
-      "homepage": "https://clicktonext.com"
+      "name": "Kirby Next",
+      "email": "contact@kirbynext.com",
+      "homepage": "https://kirbynext.com"
     }
   ],
   "config": {

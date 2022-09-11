@@ -6,7 +6,7 @@ use Kirby\Panel\Field;
 use Kirby\Panel\Panel;
 use Kirby\Toolkit\Str;
 
-Kirby::plugin('clicktonext/kirby-move-pages', [
+Kirby::plugin('kirbynext/kirby-move-pages', [
     'translations' => [
         'de' => [
             'move' => 'Verschieben',
