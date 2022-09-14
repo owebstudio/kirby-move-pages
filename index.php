@@ -6,7 +6,7 @@ use Kirby\Panel\Field;
 use Kirby\Panel\Panel;
 use Kirby\Toolkit\Str;
 
-Kirby::plugin('kirbynext/kirby-move-pages', [
+Kirby::plugin('owebstudio/kirby-move-pages', [
     'translations' => [
         'de' => [
             'move' => 'Verschieben',

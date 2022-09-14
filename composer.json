@@ -1,27 +1,27 @@
 {
-  "name": "kirbynext/kirby-move-pages",
+  "name": "owebstudio/kirby-move-pages",
   "description": "Missing move pages feature for Kirby 3",
   "type": "kirby-plugin",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "license": "MIT",
   "keywords": [
     "kirby",
     "kirby-3",
-    "kirbynext",
+    "owebstudio",
     "kirby3-plugin",
     "kirby-plugin",
-    "kirbynext-plugin",
+    "owebstudio-plugin",
     "kirby-move-pages"
   ],
-  "homepage": "https://kirbynext.com",
+  "homepage": "https://owebstudio.com",
   "support": {
-    "email": "support@kirbynext.com"
+    "email": "support@owebstudio.com"
   },
   "authors": [
     {
-      "name": "Kirby Next",
-      "email": "contact@kirbynext.com",
-      "homepage": "https://kirbynext.com"
+      "name": "oweb studio",
+      "email": "contact@owebstudio.com",
+      "homepage": "https://owebstudio.com"
     }
   ],
   "config": {
