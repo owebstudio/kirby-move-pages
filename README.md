@@ -10,7 +10,8 @@ Missing move pages feature for Kirby 3. You can move the pages under the parent 
 
 ## Usage
 
-Don't forget! To move a page under the another page, the parent page must support the page template you are moving. This option must be a query language string or an array of templates and must be a collection of pages, not a single page.
+Don't forget! To move a page under the another page, the parent page must support the page template you are moving. This
+option must be a query language string or an array of templates and must be a collection of pages, not a single page.
 
 ### Templates
 
@@ -21,10 +22,10 @@ Simply specify under which parent templates a page can be moved.
 title: Project
 
 options:
-  # parent page templates where you can move this page
-  move:
-    - projects
-    - portfolio
+    # parent page templates where you can move this page
+    move:
+        - projects
+        - portfolio
 ```
 
 ### Query language
@@ -36,13 +37,14 @@ If you need a more complex logic or dynamic parent templates, you can use the qu
 title: Project
 
 options:
-  # parent pages collection where you can move this page
-  move: site.children.filterBy('template', 'in', ['projects', 'portfolio'])
+    # parent pages collection where you can move this page
+    move: site.children.filterBy('template', 'in', ['projects', 'portfolio'])
 ```
 
 ## Sample use case: shop
 
-For example, let's assume that there is a multi-category structure on a shop site. You want to move a product to another category.
+For example, let's assume that there is a multi-category structure on a shop site. You want to move a product to another
+category.
 
 ### Content directory
 
@@ -64,8 +66,8 @@ You can set `move` option with `category` template:
 title: Product item
 
 options:
-  move:
-    - category
+    move:
+        - category
 ```
 
 Or you can use query language:
@@ -75,5 +77,21 @@ Or you can use query language:
 title: Product item
 
 options:
-  move: kirby.page('shop').children
+    move: kirby.page('shop').children
+```
+
+### Hooks
+
+```php
+// /site/config/config.php
+return [
+    'hooks' => [
+        'page.move:before' => function (Kirby\Cms\Page $page, Kirby\Cms\Page $parent) {
+            // your code goes here
+        },
+        'page.move:after' => function (Kirby\Cms\Page $newPage, Kirby\Cms\Page $oldPage, Kirby\Cms\Page $parent) {
+            // your code goes here
+        }
+    ]
+];
 ```
