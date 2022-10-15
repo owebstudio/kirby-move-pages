@@ -49,10 +49,10 @@ Available hooks for this plugin: `page.move:before` and `page.move:after`.
 // /site/config/config.php
 return [
     'hooks' => [
-        'page.move:before' => function (Kirby\Cms\Page $page, Kirby\Cms\Page $parent) {
+        'page.move:before' => function (Kirby\Cms\Page $page, ?Kirby\Cms\Page $parent = null) {
             // your code goes here
         },
-        'page.move:after' => function (Kirby\Cms\Page $newPage, Kirby\Cms\Page $oldPage, Kirby\Cms\Page $parent) {
+        'page.move:after' => function (Kirby\Cms\Page $newPage, Kirby\Cms\Page $oldPage, ?Kirby\Cms\Page $parent = null) {
             // your code goes here
         }
     ]

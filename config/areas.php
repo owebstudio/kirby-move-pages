@@ -43,18 +43,27 @@ return [
                 'page.move' => [
                     'pattern' => 'pages/(:any)/move',
                     'load' => function (string $path) use ($kirby) {
+                        $options = [];
+                        $site = $kirby->site();
                         $page = Find::page($path);
                         $move = $page->blueprint()->options()['move'] ?? false;
 
                         if (is_string($move) === true) {
                             $parents = Str::query($move, [
                                 'kirby' => $kirby,
-                                'site' => $kirby->site(),
                                 'model' => $page,
-                                'page' => $page
+                                'page' => $page,
+                                'site' => $site
                             ]);
                         } elseif (is_array($move) === true) {
-                            $parents = $kirby->site()->index()->filterBy('intendedTemplate', 'in', $move);
+                            $parents = $site->index()->filterBy('intendedTemplate', 'in', $move);
+
+                            if (in_array('site', $move) && $page->parent()) {
+                                $options[] = [
+                                    'text' => $site->title()->value() . ' (/)',
+                                    'value' => '/'
+                                ];
+                            }
                         } else {
                             throw new InvalidArgumentException('Invalid move option');
                         }
@@ -63,9 +72,12 @@ return [
                             throw new InvalidArgumentException('Move option should be return `\Kirby\Cms\Pages` collection with using query or page templates');
                         }
 
-                        $options = [];
                         foreach ($parents as $model) {
-                            if ($page->parent()->is($model) === true) {
+                            if ($page->parent() && $page->parent()->is($model) === true) {
+                                continue;
+                            }
+
+                            if ($page->is($model) === true) {
                                 continue;
                             }
 
@@ -91,6 +103,8 @@ return [
                         ];
                     },
                     'submit' => function (string $path) {
+                        $kirby = Kirby::instance();
+
                         // parent page
                         $parent = get('parent');
 
@@ -100,16 +114,16 @@ return [
 
                         // source page
                         $page = Find::page($path);
-                        $parent = Find::page($parent);
+                        $parent = $parent === '/' ? $page->site() : Find::page($parent);
                         $source = $page->root();
 
                         // new id after page will moved
-                        $newId = $parent->id() . '/' . $page->uid();
+                        $newId = $parent->is($page->site()) ? $page->uid() : ($parent->id() . '/' . $page->uid());
 
                         // trigger before hook
-                        Kirby::instance()->trigger('page.move:before', [
+                        $kirby->trigger('page.move:before', [
                             'page' => $page,
-                            'parent' => $parent
+                            'parent' => $parent->is($page->site()) ? null : $parent
                         ]);
 
                         if ($page->isDraft() === true) {
@@ -126,7 +140,7 @@ return [
                         // move the page
                         Dir::move($source, $target);
 
-                        $clone = $page->clone(['parent' => $parent]);
+                        $clone = $page->clone(['parent' => $parent->is($page->site()) ? null : $parent]);
 
                         if ($page->isDraft() === true) {
                             $page->parentModel()->drafts()->remove($page);
@@ -139,10 +153,10 @@ return [
                         // redirect after success
                         if ($newPage = $parent->childrenAndDrafts()->find($page->uid())) {
                             // trigger after hook
-                            Kirby::instance()->trigger('page.move:after', [
+                            $kirby->trigger('page.move:after', [
                                 'newPage' => $newPage,
                                 'oldPage' => $page,
-                                'parent' => $parent
+                                'parent' => $parent->is($page->site()) ? null : $parent
                             ]);
 
                             return [
