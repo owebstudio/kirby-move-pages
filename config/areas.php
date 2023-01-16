@@ -140,7 +140,10 @@ return [
                         // move the page
                         Dir::move($source, $target);
 
-                        $clone = $page->clone(['parent' => $parent->is($page->site()) ? null : $parent]);
+                        $clone = $page->clone([
+                            'content' => $page->content()->toArray(),
+                            'parent' => $parent->is($page->site()) ? null : $parent
+                        ]);
 
                         if ($page->isDraft() === true) {
                             $page->parentModel()->drafts()->remove($page);

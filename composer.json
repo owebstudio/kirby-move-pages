@@ -2,7 +2,7 @@
   "name": "owebstudio/kirby-move-pages",
   "description": "Missing move pages feature for Kirby 3",
   "type": "kirby-plugin",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "license": "MIT",
   "keywords": [
     "owebstudio",
@@ -27,10 +27,13 @@
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "getkirby/composer-installer": true
+    }
   },
   "require": {
-    "php": "^7.4|^8.0",
+    "php": "^8.0",
     "getkirby/composer-installer": "^1.2"
   },
   "extra": {
