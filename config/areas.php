@@ -2,7 +2,6 @@
 
 use Kirby\Cms\App as Kirby;
 use Kirby\Cms\Find;
-use Kirby\Exception\LogicException;
 use Kirby\Filesystem\Dir;
 use Kirby\Toolkit\Str;
 
