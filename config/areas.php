@@ -2,6 +2,7 @@
 
 use Kirby\Cms\App as Kirby;
 use Kirby\Cms\Find;
+use Kirby\Exception\LogicException;
 use Kirby\Filesystem\Dir;
 use Kirby\Toolkit\Str;
 
@@ -115,7 +116,6 @@ return [
                         // source page
                         $page = Find::page($path);
                         $parent = $parent === '/' ? $page->site() : Find::page($parent);
-                        $source = $page->root();
 
                         // new id after page will moved
                         $newId = $parent->is($page->site()) ? $page->uid() : ($parent->id() . '/' . $page->uid());
@@ -128,46 +128,45 @@ return [
 
                         if ($page->isDraft() === true) {
                             Dir::make($parent->root() . '/_drafts');
-                            $target = $parent->root() . '/_drafts/' . $page->uid();
+                            $root = $parent->root() . '/_drafts/' . $page->uid();
                         } else {
                             if ($page->isListed() === true) {
-                                $target = $parent->root() . '/' . $page->num() . '_' . $page->uid();
+                                $root = $parent->root() . '/' . $page->num() . '_' . $page->uid();
                             } else {
-                                $target = $parent->root() . '/' . $page->uid();
+                                $root = $parent->root() . '/' . $page->uid();
                             }
                         }
 
-                        // move the page
-                        Dir::move($source, $target);
-
-                        $clone = $page->clone([
+                        // clone the page
+                        $newPage = $page->clone([
                             'content' => $page->content()->toArray(),
+                            'parent' => $parent->is($page->site()) ? null : $parent,
+                            'root' => $root
+                        ]);
+
+                        // move the page
+                        Dir::move($page->root(), $newPage->root());
+
+                        // update the collections
+                        if ($page->isDraft() === true) {
+                            $page->parentModel()->drafts()->remove($page);
+                            $parent->drafts()->append($newId, $newPage);
+                        } else {
+                            $page->parentModel()->children()->remove($page);
+                            $parent->children()->append($newId, $newPage);
+                        }
+
+                        // trigger after hook
+                        $kirby->trigger('page.move:after', [
+                            'newPage' => $newPage,
+                            'oldPage' => $page,
                             'parent' => $parent->is($page->site()) ? null : $parent
                         ]);
 
-                        if ($page->isDraft() === true) {
-                            $page->parentModel()->drafts()->remove($page);
-                            $parent->drafts()->append($newId, $clone);
-                        } else {
-                            $page->parentModel()->children()->remove($page);
-                            $parent->children()->append($newId, $clone);
-                        }
-
                         // redirect after success
-                        if ($newPage = $parent->childrenAndDrafts()->find($page->uid())) {
-                            // trigger after hook
-                            $kirby->trigger('page.move:after', [
-                                'newPage' => $newPage,
-                                'oldPage' => $page,
-                                'parent' => $parent->is($page->site()) ? null : $parent
-                            ]);
-
-                            return [
-                                'redirect' => $newPage->panel()->url()
-                            ];
-                        }
-
-                        return true;
+                        return [
+                            'redirect' => $newPage->panel()->url()
+                        ];
                     }
                 ]
             ]
