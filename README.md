@@ -96,3 +96,13 @@ title: Product item
 options:
     move: kirby.page('shop').children
 ```
+
+### Permission
+
+```yaml
+# /site/blueprints/users/editor.yml
+title: Editor
+permissions:
+  owebstudio.move-pages:
+    move: false
+```

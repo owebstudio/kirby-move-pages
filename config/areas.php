@@ -25,6 +25,13 @@ return [
                             return $dropdown;
                         }
 
+                        // check user permission
+                        $permission = $kirby->user()->role()->permissions()->for('owebstudio.move-pages', 'move');
+
+                        if ($permission === false) {
+                            return $dropdown;
+                        }
+
                         // append a separator
                         $dropdown[] = '-';
 
