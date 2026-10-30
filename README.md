@@ -1,5 +1,8 @@
 # Kirby Move Pages
 
+> [!IMPORTANT]
+> This plugin is in maintenance mode and only gets security fixes. It supports Kirby 3.6 to 3.10. Kirby 4 and newer can move pages out of the box, so you don't need this plugin anymore. Remove it before you upgrade to Kirby 4, see [Upgrading to Kirby 4](#upgrading-to-kirby-4).
+
 Missing move pages feature for Kirby 3. You can move the pages under the parent pages you specify with this plugin.
 
 ## Installation
@@ -106,3 +109,11 @@ permissions:
   owebstudio.move-pages:
     move: false
 ```
+
+Moving a page changes its URL, so the user also needs the `changeSlug` permission for the page (the `pages.changeSlug` role permission and the `changeSlug` blueprint option). The home and error pages can't be moved.
+
+## Upgrading to Kirby 4
+
+Delete the plugin folder from `site/plugins` (or run `composer remove owebstudio/kirby-move-pages`) before you update Kirby. If you keep it, it replaces the Move dialog of Kirby 4 and 5, and the page options show two Move entries.
+
+Kirby 4 uses the `move` blueprint option as a permission (`true`, `false` or per role, like the other page options) and only allows parents with a pages section that accepts the page's template. Remove your lists of templates and queries from the `move` option. The role permission is `pages.move` instead of `owebstudio.move-pages.move`.
