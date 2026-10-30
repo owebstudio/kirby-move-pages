@@ -1,3 +1,5 @@
+![Move Pages, a legacy Kirby plugin by oweb studio. Move pages to another parent in the Panel.](.github/cover.png)
+
 # Kirby Move Pages
 
 > [!IMPORTANT]
