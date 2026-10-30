@@ -36,8 +36,14 @@
     "php": "^8.0",
     "getkirby/composer-installer": "^1.2"
   },
+  "conflict": {
+    "getkirby/cms": ">=4.0"
+  },
   "extra": {
-    "installer-name": "kirby-move-pages"
+    "installer-name": "kirby-move-pages",
+    "kirby": {
+      "compatible": "^3.6"
+    }
   },
   "minimum-stability": "dev",
   "prefer-stable": true
