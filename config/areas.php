@@ -58,7 +58,8 @@ return [
                     continue;
                 }
 
-                if ($page->is($model) === true) {
+                // the page cannot be moved into itself or its own children
+                if ($page->is($model) === true || $page->isAncestorOf($model) === true) {
                     continue;
                 }
 
