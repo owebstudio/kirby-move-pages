@@ -2,16 +2,81 @@
 
 use Kirby\Cms\App as Kirby;
 use Kirby\Cms\Find;
+use Kirby\Cms\Page;
+use Kirby\Exception\PermissionException;
 use Kirby\Filesystem\Dir;
 use Kirby\Toolkit\Str;
 
 return [
     'site' => function ($kirby) {
+        // check if the current user can move the page
+        $canMove = function (Page $page) use ($kirby): bool {
+            $permission = $kirby->user()->role()->permissions()->for('owebstudio.move-pages', 'move');
+
+            if ($permission === false) {
+                return false;
+            }
+
+            // Kirby 4 and newer have their own permission for moving pages
+            $action = version_compare(Kirby::version(), '4.0.0', '>=') === true ? 'move' : 'changeSlug';
+
+            return $page->permissions()->can($action);
+        };
+
+        // get the parents where the page can be moved
+        $parentOptions = function (Page $page) use ($kirby): array {
+            $options = [];
+            $site = $kirby->site();
+            $move = $page->blueprint()->options()['move'] ?? false;
+
+            if (is_string($move) === true) {
+                $parents = Str::query($move, [
+                    'kirby' => $kirby,
+                    'model' => $page,
+                    'page' => $page,
+                    'site' => $site
+                ]);
+            } elseif (is_array($move) === true) {
+                $parents = $site->index()->filterBy('intendedTemplate', 'in', $move);
+
+                if (in_array('site', $move) && $page->parent()) {
+                    $options[] = [
+                        'text' => $site->title()->value() . ' (/)',
+                        'value' => '/'
+                    ];
+                }
+            } else {
+                throw new InvalidArgumentException('Invalid move option');
+            }
+
+            if (is_a($parents, '\Kirby\Cms\Pages') === false) {
+                throw new InvalidArgumentException('Move option should be return `\Kirby\Cms\Pages` collection with using query or page templates');
+            }
+
+            foreach ($parents as $model) {
+                if ($page->parent() && $page->parent()->is($model) === true) {
+                    continue;
+                }
+
+                // the page cannot be moved into itself or its own children
+                if ($page->is($model) === true || $page->isAncestorOf($model) === true) {
+                    continue;
+                }
+
+                $options[] = [
+                    'text' => $model->title()->value() . ' (/' . $model->id() . ')',
+                    'value' => $model->id()
+                ];
+            }
+
+            return $options;
+        };
+
         return [
             'dropdowns' => [
                 'page' => [
                     'pattern' => 'pages/(:any)',
-                    'options' => function (string $path) use ($kirby) {
+                    'options' => function (string $path) use ($canMove) {
                         // find the right page for the dropdown
                         $page = Find::page($path);
 
@@ -26,9 +91,7 @@ return [
                         }
 
                         // check user permission
-                        $permission = $kirby->user()->role()->permissions()->for('owebstudio.move-pages', 'move');
-
-                        if ($permission === false) {
+                        if ($canMove($page) === false) {
                             return $dropdown;
                         }
 
@@ -49,49 +112,12 @@ return [
             'dialogs' => [
                 'page.move' => [
                     'pattern' => 'pages/(:any)/move',
-                    'load' => function (string $path) use ($kirby) {
-                        $options = [];
-                        $site = $kirby->site();
+                    'load' => function (string $path) use ($canMove, $parentOptions) {
                         $page = Find::page($path);
-                        $move = $page->blueprint()->options()['move'] ?? false;
 
-                        if (is_string($move) === true) {
-                            $parents = Str::query($move, [
-                                'kirby' => $kirby,
-                                'model' => $page,
-                                'page' => $page,
-                                'site' => $site
-                            ]);
-                        } elseif (is_array($move) === true) {
-                            $parents = $site->index()->filterBy('intendedTemplate', 'in', $move);
-
-                            if (in_array('site', $move) && $page->parent()) {
-                                $options[] = [
-                                    'text' => $site->title()->value() . ' (/)',
-                                    'value' => '/'
-                                ];
-                            }
-                        } else {
-                            throw new InvalidArgumentException('Invalid move option');
-                        }
-
-                        if (is_a($parents, '\Kirby\Cms\Pages') === false) {
-                            throw new InvalidArgumentException('Move option should be return `\Kirby\Cms\Pages` collection with using query or page templates');
-                        }
-
-                        foreach ($parents as $model) {
-                            if ($page->parent() && $page->parent()->is($model) === true) {
-                                continue;
-                            }
-
-                            if ($page->is($model) === true) {
-                                continue;
-                            }
-
-                            $options[] = [
-                                'text' => $model->title()->value() . ' (/' . $model->id() . ')',
-                                'value' => $model->id()
-                            ];
+                        // check user permission
+                        if ($canMove($page) === false) {
+                            throw new PermissionException('You are not allowed to move this page');
                         }
 
                         return [
@@ -102,14 +128,14 @@ return [
                                         'label' => t('select.parent'),
                                         'type' => 'select',
                                         'icon' => 'page',
-                                        'options' => $options,
+                                        'options' => $parentOptions($page),
                                         'empty' => true
                                     ]
                                 ]
                             ]
                         ];
                     },
-                    'submit' => function (string $path) {
+                    'submit' => function (string $path) use ($canMove, $parentOptions) {
                         $kirby = Kirby::instance();
 
                         // parent page
@@ -121,6 +147,17 @@ return [
 
                         // source page
                         $page = Find::page($path);
+
+                        // check user permission
+                        if ($canMove($page) === false) {
+                            throw new PermissionException('You are not allowed to move this page');
+                        }
+
+                        // only allow the parents from the dialog options
+                        if (in_array($parent, array_column($parentOptions($page), 'value'), true) === false) {
+                            throw new InvalidArgumentException('The page cannot be moved to the selected parent');
+                        }
+
                         $parent = $parent === '/' ? $page->site() : Find::page($parent);
 
                         // new id after page will moved
